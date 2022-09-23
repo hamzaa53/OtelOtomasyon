@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System.Data.OleDb;
 using System.Data;
 using System.Drawing;
+using OtelOtomasyon.Properties;
 
 namespace OtelOtomasyon
 {
@@ -14,13 +15,47 @@ namespace OtelOtomasyon
         {
             InitializeComponent();
         }
-        OleDbConnection baglanti = new OleDbConnection($@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={Application.StartupPath}\Veritabani.accdb");
-        OleDbCommand komut = new OleDbCommand();
-        DataSet ds = new DataSet();
+
+        OleDbConnection baglanti;
+        OleDbCommand komut;
+        DataSet ds;
+        string dosyaYolu = Settings1.Default.DosyaYolu;
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            if (dosyaYolu == null)
+            {
+                MessageBox.Show("Uygulama başlatılmadan önce mutlaka kullanıcıların kaydedileceği bir Access veritabanı dosyası seçilmesi gereklidir.", "Veri tabanı dosyası bulunamadı", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (dosyaSec.ShowDialog() == DialogResult.OK)
+                {
+                    dosyaYolu = dosyaSec.FileName;
+                    Settings1.Default.DosyaYolu = dosyaYolu;
+                }
+                else Application.Exit();
+            }
+
+            if(dosyaYolu != null)
+            {
+                TabloyuYenile();
+                OdaKontrol();
+                KalanGunleriAl();
+                tcNoGiris.Focus();
+                oncekiSecim = gizliButon;
+                this.Size = new Size(712, 703);
+                comboBox1.SelectedIndex = 0;
+                comboBox2.SelectedIndex = 0;
+                zaman.Text = DateTime.Now.ToString("dd.MM.yyyy - HH:mm");
+                cikisTarihi.MaxDate = new DateTime(DateTime.Now.Year + 1, DateTime.Now.Month, DateTime.Now.Day);
+                cikisTarihi.MinDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1);
+                CurrencyManager secim = (CurrencyManager)BindingContext[dataGridView1.DataSource]; secim.SuspendBinding();
+            }
+        }
 
         public void TabloyuYenile()
         {
-            Control.CheckForIllegalCrossThreadCalls = false;
+            baglanti = new OleDbConnection($@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dosyaYolu}");
+            komut = new OleDbCommand(); ds = new DataSet();
+            CheckForIllegalCrossThreadCalls = false;
             OleDbDataAdapter adapter = new OleDbDataAdapter("SELECT * FROM Tablo1", baglanti);
             baglanti.Open();
             ds = new DataSet();
@@ -28,6 +63,9 @@ namespace OtelOtomasyon
             baglanti.Close();
             dataGridView1.DataSource = ds.Tables["Tablo1"];
             toplamVeri.Text = $"Toplam Veri: {ToplamKullanici()}";
+
+            WindowState = FormWindowState.Normal;
+            Show(); BringToFront();
         }
 
         public void YeniKayitEkle(string TC_NO, string AD, string SOYAD, byte YAS, string CINSIYET, byte ODA_NO, string GIRIS_TARIHI, string CIKIS_TARIHI, byte KALAN_GUN, string TOPLAM_TUTAR, string DURUM)
@@ -42,6 +80,7 @@ namespace OtelOtomasyon
         public void TabloyuGuncelle()
         {
             baglanti.Open();
+
             for (int i = 0; i < ToplamKullanici(); i++)
             {
                 komut = new OleDbCommand(string.Format($"UPDATE Tablo1 SET AD='{Veri(i, 1)}', SOYAD='{Veri(i, 2)}', YAS={Veri(i, 3)}, CINSIYET='{Veri(i, 4)}', ODA_NO={Veri(i, 5)}, GIRIS_TARIHI='{Veri(i, 6)}', CIKIS_TARIHI='{Veri(i, 7)}', KALAN_GUN={Veri(i, 8)}, TOPLAM_TUTAR='{Veri(i, 9)}', DURUM='{Veri(i, 10)}' WHERE TC_NO='{Veri(i, 0)}'"), baglanti);
@@ -65,22 +104,8 @@ namespace OtelOtomasyon
         public int ToplamKullanici()
         {
             if (dataGridView1.AllowUserToAddRows == true)
-            { return dataGridView1.Rows.Count - 1; }
-            else
-            { return dataGridView1.Rows.Count; }
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            TabloyuYenile();
-            OdaKontrol();
-            KalanGunleriAl();
-            tcNoGiris.Focus();
-            oncekiSecim = gizliButon;
-            this.Size = new Size(712, 703);
-            zaman.Text = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
-            cikisTarihi.MaxDate = new DateTime(DateTime.Now.Year+1, DateTime.Now.Month, DateTime.Now.Day);
-            cikisTarihi.MinDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1);
+                return dataGridView1.Rows.Count - 1;
+            else return dataGridView1.Rows.Count;
         }
 
         void KalanGunleriAl()
@@ -108,6 +133,7 @@ namespace OtelOtomasyon
             byte sira = 0;
             listView1.Items.Clear();
             Button b = (Button)sender;
+
             for (int i = 0; i < ToplamKullanici(); i++)
             {
                 byte odaNo = Convert.ToByte(Veri(i, 5));
@@ -131,10 +157,7 @@ namespace OtelOtomasyon
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
-            {
-                e.Handled = true;
-            }
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) e.Handled = true;
         }
 
         void TutarHesapla()
@@ -161,10 +184,7 @@ namespace OtelOtomasyon
         private void YeniKayit(object sender, EventArgs e)
         {
             HatalariSifirla();
-            if (ODA_NO == 0)
-            {
-                odaNoHata.Visible = true;
-            }
+            if (ODA_NO == 0) odaNoHata.Visible = true;
             if (!odaNoHata.Visible)
             {
                 if (kisiSayisi == 1 && birinciKisi.Text != "1") SistemeKaydet(1);
@@ -176,13 +196,14 @@ namespace OtelOtomasyon
         }
 
         bool kayitBasarili = false;
-        string[] cikisTarihleri = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+        string[] cikisTarihleri = new string[22];
         private void SistemeKaydet(byte kisiSayisi)
         {
             string DURUM;
             string TARIH = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
             byte KALAN_GUN = Convert.ToByte(Math.Ceiling((cikisTarihi.Value - DateTime.Now).TotalDays));
             Array[] formlar = { form1, form2, form3, form4 };
+
             for (int i = 0; i < kisiSayisi; i++)
             {
                 string TC_NO = formlar[i].GetValue(0).ToString();
@@ -281,13 +302,8 @@ namespace OtelOtomasyon
         private void SadeceHarf(object sender, KeyPressEventArgs e)
         {
             if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar) && !char.IsSeparator(e.KeyChar))
-            {
                 e.Handled = true;
-            }
-            if ((int)e.KeyChar == 32)
-            {
-                e.Handled = true;
-            }
+            if ((int)e.KeyChar == 32) e.Handled = true;
         }
 
         private void HatalariSifirla()
@@ -337,10 +353,9 @@ namespace OtelOtomasyon
             {
                 DateTime tarih;
                 if (cikisTarihleri[i] != "Belirsiz" && cikisTarihleri[i] != "")
-                {
                     tarih = Convert.ToDateTime(cikisTarihleri[i]);
-                }
                 else continue;
+
                 int kalanGun = Convert.ToInt32(Math.Ceiling((tarih - DateTime.Now).TotalDays));
                 if (kalanGun <= 0)
                 {
@@ -369,6 +384,7 @@ namespace OtelOtomasyon
             Button[] odalar = { oda1, oda2, oda3, oda4, oda5, oda6, oda7, oda8, oda9,
             oda10, oda11, oda12, oda13, oda14, oda15, oda16, oda17, oda18, oda19, oda20 };
             OdaSecimleriniKaldir();
+
             for (int i = 0; i < ToplamKullanici(); i++)
             {
                 for (int j = 0; j < 20; j++)
@@ -386,6 +402,7 @@ namespace OtelOtomasyon
         {
             Button[] nolar = { no1, no2, no3, no4, no5, no6, no7, no8, no9,
             no10, no11, no12, no13, no14, no15, no16, no17, no18, no19, no20 };
+
             for (int i = 0; i < ToplamKullanici(); i++)
             {
                 for (int j = 0; j < 20; j++)
@@ -412,23 +429,19 @@ namespace OtelOtomasyon
 
         private void OdaNumarasiniGizle(object sender, EventArgs e)
         {
-            if (ODA_NO == 0)
-            {
-                odaNoGostergeci.Visible = false;
-            }
-            else
-            {
-                odaNoGostergeci.Text = ODA_NO.ToString();
-            }
+            if (ODA_NO == 0) odaNoGostergeci.Visible = false;
+            else odaNoGostergeci.Text = ODA_NO.ToString();
         }
 
         private void KisiSayisi(object sender, EventArgs e)
         {
             RadioButton r = (RadioButton)sender;
+
             if (r.Name == "bir") Bir();
             else if (r.Name == "iki") Iki();
             else if (r.Name == "uc") Uc();
             else if (r.Name == "dort") Dort();
+
             seciliKisi = 1;
             KisiSecimi(birinciKisi, e);
             TutarHesapla();
@@ -638,8 +651,7 @@ namespace OtelOtomasyon
             {
                 if (seciliKisi == 1 && yas < 18)
                     MessageBox.Show("Ödeme yapacak kişi 18 yaşından küçük olamaz.", "Yaş Sınırı", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else
-                    FormuKaydet();
+                else FormuKaydet();
 
                 TutarHesapla();
             }
@@ -652,52 +664,54 @@ namespace OtelOtomasyon
         void FormuKaydet()
         {
             int yas = DateTime.Now.Year - dogumTarihiSecimi.Value.Year;
-            if (seciliKisi == 1)
+
+            switch (seciliKisi)
             {
-                form1[0] = tcNoGiris.Text;
-                form1[1] = adGiris.Text;
-                form1[2] = soyadGiris.Text;
-                form1[3] = yas.ToString();
-                if (kizSecenegi.Checked == true) form1[4] = "Kız";
-                else if (erkekSecenegi.Checked == true) form1[4] = "Erkek";
-                form1[5] = dogumTarihiSecimi.Value.ToString().Substring(0, 10);
-                birinciKisi.Text = adGiris.Text + " " + soyadGiris.Text;
-            }
-            else if (seciliKisi == 2)
-            {
-                form2[0] = tcNoGiris.Text;
-                form2[1] = adGiris.Text;
-                form2[2] = soyadGiris.Text;
-                form2[3] = yas.ToString();
-                if (kizSecenegi.Checked == true) form2[4] = "Kız";
-                else if (erkekSecenegi.Checked == true) form2[4] = "Erkek";
-                form2[5] = dogumTarihiSecimi.Value.ToString().Substring(0, 10);
-                ikinciKisi.Text = adGiris.Text + " " + soyadGiris.Text;
-                if (yas <= 6) form2[6] = "Ç"; else form2[6] = "Y";
-            }
-            else if (seciliKisi == 3)
-            {
-                form3[0] = tcNoGiris.Text;
-                form3[1] = adGiris.Text;
-                form3[2] = soyadGiris.Text;
-                form3[3] = yas.ToString();
-                if (kizSecenegi.Checked == true) form3[4] = "Kız";
-                else if (erkekSecenegi.Checked == true) form3[4] = "Erkek";
-                form3[5] = dogumTarihiSecimi.Value.ToString().Substring(0, 10);
-                ucuncuKisi.Text = adGiris.Text + " " + soyadGiris.Text;
-                if (yas <= 6) form3[6] = "Ç"; else form3[6] = "Y";
-            }
-            else if (seciliKisi == 4)
-            {
-                form4[0] = tcNoGiris.Text;
-                form4[1] = adGiris.Text;
-                form4[2] = soyadGiris.Text;
-                form4[3] = yas.ToString();
-                if (kizSecenegi.Checked == true) form4[4] = "Kız";
-                else if (erkekSecenegi.Checked == true) form4[4] = "Erkek";
-                form4[5] = dogumTarihiSecimi.Value.ToString().Substring(0, 10);
-                dorduncuKisi.Text = adGiris.Text + " " + soyadGiris.Text;
-                if (yas <= 6) form4[6] = "Ç"; else form4[6] = "Y";
+                case 1:
+                    form1[0] = tcNoGiris.Text;
+                    form1[1] = adGiris.Text;
+                    form1[2] = soyadGiris.Text;
+                    form1[3] = yas.ToString();
+                    if (kizSecenegi.Checked == true) form1[4] = "Kız";
+                    else if (erkekSecenegi.Checked == true) form1[4] = "Erkek";
+                    form1[5] = dogumTarihiSecimi.Value.ToString().Substring(0, 10);
+                    birinciKisi.Text = adGiris.Text + " " + soyadGiris.Text;
+                    break;
+                case 2:
+                    form2[0] = tcNoGiris.Text;
+                    form2[1] = adGiris.Text;
+                    form2[2] = soyadGiris.Text;
+                    form2[3] = yas.ToString();
+                    if (kizSecenegi.Checked == true) form2[4] = "Kız";
+                    else if (erkekSecenegi.Checked == true) form2[4] = "Erkek";
+                    form2[5] = dogumTarihiSecimi.Value.ToString().Substring(0, 10);
+                    ikinciKisi.Text = adGiris.Text + " " + soyadGiris.Text;
+                    if (yas <= 6) form2[6] = "Ç"; else form2[6] = "Y";
+                    break;
+                case 3:
+                    form3[0] = tcNoGiris.Text;
+                    form3[1] = adGiris.Text;
+                    form3[2] = soyadGiris.Text;
+                    form3[3] = yas.ToString();
+                    if (kizSecenegi.Checked == true) form3[4] = "Kız";
+                    else if (erkekSecenegi.Checked == true) form3[4] = "Erkek";
+                    form3[5] = dogumTarihiSecimi.Value.ToString().Substring(0, 10);
+                    ucuncuKisi.Text = adGiris.Text + " " + soyadGiris.Text;
+                    if (yas <= 6) form3[6] = "Ç"; else form3[6] = "Y";
+                    break;
+                case 4:
+                    form4[0] = tcNoGiris.Text;
+                    form4[1] = adGiris.Text;
+                    form4[2] = soyadGiris.Text;
+                    form4[3] = yas.ToString();
+                    if (kizSecenegi.Checked == true) form4[4] = "Kız";
+                    else if (erkekSecenegi.Checked == true) form4[4] = "Erkek";
+                    form4[5] = dogumTarihiSecimi.Value.ToString().Substring(0, 10);
+                    dorduncuKisi.Text = adGiris.Text + " " + soyadGiris.Text;
+                    if (yas <= 6) form4[6] = "Ç"; else form4[6] = "Y";
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -819,10 +833,8 @@ namespace OtelOtomasyon
             for (int i = 0; i < ToplamKullanici(); i++)
             {
                 listView3.Items.Add(Veri(i, 0));
-                for (int j = 1; j < 11; j++)
-                {
-                    listView3.Items[sira].SubItems.Add(Veri(i, j));
-                }
+                for (int j = 1; j < 11; j++) listView3.Items[sira].SubItems.Add(Veri(i, j));
+
                 sira++;
             }
         }
@@ -836,6 +848,7 @@ namespace OtelOtomasyon
         {
             listView3.Items.Clear();
             int sira = 0;
+
             if (comboBox1.SelectedItem.ToString() != "Hepsi")
             {
                 for (int i = 0; i < ToplamKullanici(); i++)
@@ -843,10 +856,8 @@ namespace OtelOtomasyon
                     if (Veri(i, 5) == comboBox1.SelectedItem.ToString())
                     {
                         listView3.Items.Add(Veri(i, 0));
-                        for (int j = 1; j < 11; j++)
-                        {
-                            listView3.Items[sira].SubItems.Add(Veri(i, j));
-                        }
+                        for (int j = 1; j < 11; j++) listView3.Items[sira].SubItems.Add(Veri(i, j));
+
                         sira++;
                     }
                 }
@@ -858,6 +869,7 @@ namespace OtelOtomasyon
         {
             listView3.Items.Clear();
             int sira = 0;
+
             if (comboBox2.SelectedItem.ToString() != "Hepsi")
             {
                 for (int i = 0; i < ToplamKullanici(); i++)
@@ -865,10 +877,8 @@ namespace OtelOtomasyon
                     if (Veri(i, 10) == comboBox2.SelectedItem.ToString())
                     {
                         listView3.Items.Add(Veri(i, 0));
-                        for (int j = 1; j < 11; j++)
-                        {
-                            listView3.Items[sira].SubItems.Add(Veri(i, j));
-                        }
+                        for (int j = 1; j < 11; j++) listView3.Items[sira].SubItems.Add(Veri(i, j));
+
                         sira++;
                     }
                 }
@@ -892,20 +902,18 @@ namespace OtelOtomasyon
 
         private void button3_Click(object sender, EventArgs e)
         {
-            printPreviewDialog1.ShowDialog();
+            dokumanOnizle.ShowDialog();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            printDocument1.Print();
+            dokumanYazdir.Print();
         }
 
         Font YaziTipi(bool kalinlik = false, byte boyut = 15)
         {
-            Font font; if (kalinlik == true)
-                font = new Font("Arial", boyut, FontStyle.Bold);
-            else font = new Font("Arial", boyut, FontStyle.Regular);
-            return font;
+            if (kalinlik == true) return new Font("Arial", boyut, FontStyle.Bold);
+            else return new Font("Arial", boyut, FontStyle.Regular);
         }
 
         private void printDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
@@ -943,9 +951,15 @@ namespace OtelOtomasyon
                     if (j == 8) continue;
                     if (checkBox2.Checked) veri = listView3.SelectedItems[i].SubItems[j].Text;
                     else veri = listView3.Items[i].SubItems[j].Text;
+
                     e.Graphics.DrawString(veri, YaziTipi(false, boyut), yazi, sutunlar[j], hiza);
                 }
             }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Settings1.Default.Save();
         }
     }
 }

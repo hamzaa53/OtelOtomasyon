@@ -169,10 +169,11 @@ namespace OtelOtomasyon
             this.columnHeader20 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader21 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.zaman = new System.Windows.Forms.Label();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.printPreviewDialog1 = new System.Windows.Forms.PrintPreviewDialog();
-            this.printDocument1 = new System.Drawing.Printing.PrintDocument();
+            this.zamanlayici = new System.Windows.Forms.Timer(this.components);
+            this.bilgiKutusu = new System.Windows.Forms.ToolTip(this.components);
+            this.dokumanOnizle = new System.Windows.Forms.PrintPreviewDialog();
+            this.dokumanYazdir = new System.Drawing.Printing.PrintDocument();
+            this.dosyaSec = new System.Windows.Forms.OpenFileDialog();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.kayitFormu1.SuspendLayout();
@@ -1055,7 +1056,7 @@ namespace OtelOtomasyon
             this.bilgiButon.Size = new System.Drawing.Size(22, 24);
             this.bilgiButon.TabIndex = 34;
             this.bilgiButon.Text = "i";
-            this.toolTip1.SetToolTip(this.bilgiButon, "1-8 Arası Odalar: 150₺\r\n9-12 Arası Odalar: 175₺\r\n13-20 Arası Odalar: 200₺");
+            this.bilgiKutusu.SetToolTip(this.bilgiButon, "1-8 Arası Odalar: 150₺\r\n9-12 Arası Odalar: 175₺\r\n13-20 Arası Odalar: 200₺");
             this.bilgiButon.UseVisualStyleBackColor = true;
             // 
             // yeniKayitEkleButonu
@@ -1774,6 +1775,7 @@ namespace OtelOtomasyon
             // 
             // comboBox2
             // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox2.Enabled = false;
             this.comboBox2.Font = new System.Drawing.Font("Bahnschrift Light", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.comboBox2.FormattingEnabled = true;
@@ -1785,11 +1787,11 @@ namespace OtelOtomasyon
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(174, 31);
             this.comboBox2.TabIndex = 56;
-            this.comboBox2.Text = "Hepsi";
             this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
             // 
             // comboBox1
             // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox1.Font = new System.Drawing.Font("Bahnschrift Light", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Items.AddRange(new object[] {
@@ -1818,7 +1820,6 @@ namespace OtelOtomasyon
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(174, 31);
             this.comboBox1.TabIndex = 54;
-            this.comboBox1.Text = "Hepsi";
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // listView3
@@ -1909,45 +1910,50 @@ namespace OtelOtomasyon
             this.zaman.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.zaman.AutoSize = true;
             this.zaman.BackColor = System.Drawing.SystemColors.Control;
-            this.zaman.Font = new System.Drawing.Font("Bahnschrift", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.zaman.Location = new System.Drawing.Point(684, 3);
+            this.zaman.Font = new System.Drawing.Font("Bahnschrift SemiCondensed", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.zaman.Location = new System.Drawing.Point(708, 9);
             this.zaman.Name = "zaman";
-            this.zaman.Size = new System.Drawing.Size(166, 29);
+            this.zaman.Size = new System.Drawing.Size(133, 23);
             this.zaman.TabIndex = 3;
-            this.zaman.Text = "01.01.2021 12:30";
+            this.zaman.Text = "01.01.2021 - 12:30";
             this.zaman.Click += new System.EventHandler(this.zaman_Click);
             // 
-            // timer1
+            // zamanlayici
             // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 30000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.zamanlayici.Enabled = true;
+            this.zamanlayici.Interval = 30000;
+            this.zamanlayici.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // toolTip1
+            // bilgiKutusu
             // 
-            this.toolTip1.AutomaticDelay = 100;
-            this.toolTip1.AutoPopDelay = 9000;
-            this.toolTip1.InitialDelay = 100;
-            this.toolTip1.IsBalloon = true;
-            this.toolTip1.ReshowDelay = 20;
-            this.toolTip1.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
-            this.toolTip1.ToolTipTitle = "Günlük Oda Ücretleri";
+            this.bilgiKutusu.AutomaticDelay = 100;
+            this.bilgiKutusu.AutoPopDelay = 9000;
+            this.bilgiKutusu.InitialDelay = 100;
+            this.bilgiKutusu.IsBalloon = true;
+            this.bilgiKutusu.ReshowDelay = 20;
+            this.bilgiKutusu.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.bilgiKutusu.ToolTipTitle = "Günlük Oda Ücretleri";
             // 
-            // printPreviewDialog1
+            // dokumanOnizle
             // 
-            this.printPreviewDialog1.AutoScrollMargin = new System.Drawing.Size(0, 0);
-            this.printPreviewDialog1.AutoScrollMinSize = new System.Drawing.Size(0, 0);
-            this.printPreviewDialog1.ClientSize = new System.Drawing.Size(400, 300);
-            this.printPreviewDialog1.Document = this.printDocument1;
-            this.printPreviewDialog1.Enabled = true;
-            this.printPreviewDialog1.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialog1.Icon")));
-            this.printPreviewDialog1.Name = "printPreviewDialog1";
-            this.printPreviewDialog1.Text = "Baskı önizleme";
-            this.printPreviewDialog1.Visible = false;
+            this.dokumanOnizle.AutoScrollMargin = new System.Drawing.Size(0, 0);
+            this.dokumanOnizle.AutoScrollMinSize = new System.Drawing.Size(0, 0);
+            this.dokumanOnizle.ClientSize = new System.Drawing.Size(400, 300);
+            this.dokumanOnizle.Document = this.dokumanYazdir;
+            this.dokumanOnizle.Enabled = true;
+            this.dokumanOnizle.Icon = ((System.Drawing.Icon)(resources.GetObject("dokumanOnizle.Icon")));
+            this.dokumanOnizle.Name = "printPreviewDialog1";
+            this.dokumanOnizle.Text = "Baskı önizleme";
+            this.dokumanOnizle.Visible = false;
             // 
-            // printDocument1
+            // dokumanYazdir
             // 
-            this.printDocument1.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument1_PrintPage);
+            this.dokumanYazdir.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument1_PrintPage);
+            // 
+            // dosyaSec
+            // 
+            this.dosyaSec.FileName = "Veritabanını Seç";
+            this.dosyaSec.Filter = "Access Veritabanı|*.accdb";
             // 
             // Form1
             // 
@@ -1962,6 +1968,7 @@ namespace OtelOtomasyon
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Otel Otomasyon Sistemi";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
@@ -2066,7 +2073,7 @@ namespace OtelOtomasyon
         private System.Windows.Forms.Label soyadHata;
         private System.Windows.Forms.Button seciliVeriyiSilButonu;
         private System.Windows.Forms.Label zaman;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer zamanlayici;
         private System.Windows.Forms.TextBox odaNoGostergeci;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.Button bilgiButon;
@@ -2087,7 +2094,7 @@ namespace OtelOtomasyon
         private System.Windows.Forms.GroupBox kayitFormu1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolTip bilgiKutusu;
         private System.Windows.Forms.DateTimePicker cikisTarihi;
         private System.Windows.Forms.Label toplamTutarText;
         private System.Windows.Forms.Label odaTutariText;
@@ -2124,13 +2131,14 @@ namespace OtelOtomasyon
         private System.Windows.Forms.ColumnHeader columnHeader21;
         private System.Windows.Forms.RadioButton radioButton2;
         private System.Windows.Forms.RadioButton radioButton1;
-        private System.Windows.Forms.PrintPreviewDialog printPreviewDialog1;
-        private System.Drawing.Printing.PrintDocument printDocument1;
+        private System.Windows.Forms.PrintPreviewDialog dokumanOnizle;
+        private System.Drawing.Printing.PrintDocument dokumanYazdir;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.ColumnHeader columnHeader22;
         private System.Windows.Forms.ColumnHeader columnHeader23;
         private System.Windows.Forms.ColumnHeader columnHeader24;
+        private System.Windows.Forms.OpenFileDialog dosyaSec;
     }
 }
 
