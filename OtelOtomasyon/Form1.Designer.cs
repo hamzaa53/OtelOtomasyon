@@ -237,6 +237,7 @@ namespace OtelOtomasyon
             // 
             this.belirsiz.AutoSize = true;
             this.belirsiz.Font = new System.Drawing.Font("Bahnschrift", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.belirsiz.ForeColor = System.Drawing.SystemColors.WindowText;
             this.belirsiz.Location = new System.Drawing.Point(405, 333);
             this.belirsiz.Name = "belirsiz";
             this.belirsiz.Size = new System.Drawing.Size(83, 23);

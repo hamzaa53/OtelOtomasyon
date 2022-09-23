@@ -47,7 +47,6 @@ namespace OtelOtomasyon
                 zaman.Text = DateTime.Now.ToString("dd.MM.yyyy - HH:mm");
                 cikisTarihi.MaxDate = new DateTime(DateTime.Now.Year + 1, DateTime.Now.Month, DateTime.Now.Day);
                 cikisTarihi.MinDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1);
-                CurrencyManager secim = (CurrencyManager)BindingContext[dataGridView1.DataSource]; secim.SuspendBinding();
             }
         }
 
@@ -808,6 +807,8 @@ namespace OtelOtomasyon
                 TabloyuYenile();
                 KalanGunleriAl();
                 this.Size = new Size(1073, 703);
+                dataGridView1.ClearSelection();
+                tabloyuGuncelleButon.Enabled = false;
             }
             else if (tabControl1.SelectedIndex == 2)
             {

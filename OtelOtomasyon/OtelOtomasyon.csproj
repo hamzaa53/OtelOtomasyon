@@ -92,10 +92,5 @@
   <ItemGroup>
     <None Include="Resources\OtelLogo.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\Veritabani.accdb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
